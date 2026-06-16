@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>NOVA TOURNAMENTS FF – Premium Fintech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --black: #000;
+            --dark: #0a0a0f;
+            --neon-blue: #1E90FF;
+            --purple: #8A2BE2;
+            --glass-bg: rgba(20, 20, 30, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --radius: 18px;
+            --radius-sm: 12px;
+            --transition: 0.3s ease;
+            --font-poppins: 'Poppins', sans-serif;
+            --font-inter: 'Inter', sans-serif;
+            --nav-height: 68px;
+            --header-height: 56px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: var(--font-inter);
+            background: #000;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* SPLASH */
+        #splashScreen { position: fixed; inset: 0; z-index: 9999; background: #000; display: flex; align-items: center; justify-content: center; flex-direction: column; transition: opacity 0.6s ease, visibility 0.6s ease; }
+        #splashScreen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        #splashCanvas { position: absolute; inset: 0; }
+        .nova-text { font-family: var(--font-poppins); font-size: clamp(2.2rem, 7vw, 4.5rem); font-weight: 900; background: linear-gradient(135deg, var(--neon-blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: splashGlow 1.2s infinite alternate, splashPulse 1.6s infinite; text-align: center; }
+        @keyframes splashGlow { 0% { filter: drop-shadow(0 0 15px #1E90FF); } 100% { filter: drop-shadow(0 0 40px #8A2BE2); } }
+        @keyframes splashPulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+        .splash-subtitle { font-size: 0.9rem; color: rgba(255,255,255,0.5); letter-spacing: 0.2em; margin-top: 12px; }
+
+        /* AUTH PAGES */
+        .auth-wrapper { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(ellipse at top, #1a1a2e 0%, #000 70%); }
+        .auth-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; padding: 35px 28px; width: 100%; max-width: 420px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        .auth-card h2 { font-family: var(--font-poppins); font-size: 1.8rem; font-weight: 700; text-align: center; background: linear-gradient(135deg, var(--neon-blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .input-group { margin-bottom: 16px; }
+        .input-group label { display: block; font-size: 0.8rem; color: #aaa; margin-bottom: 5px; }
+        .input-group input, .input-group select, textarea { width: 100%; padding: 13px 16px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; color: #fff; font-size: 0.95rem; outline: none; font-family: var(--font-inter); }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 30px; font-family: var(--font-poppins); font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: var(--transition); }
+        .btn-primary { background: linear-gradient(135deg, var(--neon-blue), #1873cc); color: #fff; box-shadow: 0 4px 20px rgba(30,144,255,0.4); }
+        .btn-secondary { background: transparent; color: #ccc; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-sm { width: auto; padding: 8px 16px; font-size: 0.8rem; }
+        .auth-link { text-align: center; margin-top: 16px; font-size: 0.85rem; color: #888; }
+        .auth-link span { color: var(--neon-blue); cursor: pointer; }
+        .error-msg { color: #e74c3c; font-size: 0.78rem; margin-top: 4px; display: none; }
+
+        /* MAIN APP SHELL */
+        #mainApp { display: none; flex-direction: column; height: 100vh; }
+        .app-header { height: var(--header-height); background: rgba(10,10,20,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; position: sticky; top: 0; z-index: 100; }
+        .app-header .brand { font-family: var(--font-poppins); font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, var(--neon-blue), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-icons { display: flex; gap: 12px; }
+        .header-btn { background: none; border: none; color: #ccc; font-size: 1.3rem; cursor: pointer; position: relative; }
+        .bell-badge { position: absolute; top: -4px; right: -4px; background: #e74c3c; color: #fff; font-size: 0.6rem; width: 16px; height: 16px; border-radius: 50%; display: none; align-items: center; justify-content: center; }
+        .page-content { flex: 1; overflow-y: auto; padding: 16px; padding-bottom: calc(var(--nav-height) + 16px); }
+        .bottom-nav { height: var(--nav-height); background: rgba(10,10,20,0.95); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-around; position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #888; font-size: 0.7rem; cursor: pointer; transition: var(--transition); background: none; border: none; }
+        .nav-item.active { color: var(--neon-blue); }
+        .nav-item .nav-icon { font-size: 1.4rem; }
+
+        /* REUSABLE CARDS */
+        .glass-card { background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+        .coin-display { text-align: center; padding: 24px; }
+        .coin-balance { font-family: var(--font-poppins); font-size: 2.4rem; font-weight: 800; }
+        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .action-card { background: var(--glass-bg); border-radius: var(--radius); padding: 20px; text-align: center; cursor: pointer; border: 1px solid var(--glass-border); transition: var(--transition); }
+        .action-card:active { transform: scale(0.96); }
+        .section-title { font-family: var(--font-poppins); font-size: 1.2rem; font-weight: 700; margin-bottom: 12px; }
+        .flex-row { display: flex; justify-content: space-between; align-items: center; }
+        .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--purple); color: #fff; }
+        .tournament-card { background: var(--glass-bg); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 10px; border: 1px solid var(--glass-border); }
+        .slot-info { font-size: 0.8rem; color: var(--neon-blue); }
+        .notice { background: rgba(138, 43, 226, 0.15); border-left: 3px solid var(--purple); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; color: #ddd; }
+
+        /* TOAST */
+        .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; width: 90%; max-width: 400px; }
+        .toast { background: #1a1a1f; border-radius: 25px; padding: 12px 20px; color: #fff; font-size: 0.85rem; text-align: center; animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards; margin-bottom: 8px; }
+        .toast.success { border: 1px solid #27ae60; }
+        .toast.error { border: 1px solid #e74c3c; }
+        @keyframes toastIn { from{opacity:0;transform:translateY(-30px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes toastOut { from{opacity:1;transform:translateY(0);} to{opacity:0;transform:translateY(-30px);} }
+    </style>
+</head>
+<body>
+    <div id="splashScreen">
+        <canvas id="splashCanvas"></canvas>
+        <div style="z-index:1;text-align:center;">
+            <div class="nova-text">NOVA<br>TOURNAMENTS FF</div>
+            <div class="splash-subtitle">PREMIUM FINTECH</div>
+        </div>
+    </div>
+    <div class="toast-container" id="toastContainer"></div>
+    <div id="authContainer"></div>
+    <div id="mainApp">
+        <div class="app-header">
+            <span class="brand">NOVA TOURNAMENTS FF</span>
+            <div class="header-icons">
+                <button class="header-btn" id="notifBell" onclick="navigateTo('notifications')">🔔<span class="bell-badge" id="bellBadge"></span></button>
+                <button class="header-btn" onclick="logout()">🔒</button>
+            </div>
+        </div>
+        <div class="page-content" id="pageContent"></div>
+        <div class="bottom-nav">
+            <button class="nav-item" data-page="dashboard"><span class="nav-icon">🏠</span>Home</button>
+            <button class="nav-item" data-page="tournaments"><span class="nav-icon">🏟️</span>Tournaments</button>
+            <button class="nav-item" data-page="leaderboard"><span class="nav-icon">🏆</span>Board</button>
+            <button class="nav-item" data-page="profile"><span class="nav-icon">👤</span>Profile</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ───────────────────── DATABASE ─────────────────────
+            const DB = {
+                users: () => JSON.parse(localStorage.getItem('nv_u') || '[]'),
+                setUsers: d => localStorage.setItem('nv_u', JSON.stringify(d)),
+                deposits: () => JSON.parse(localStorage.getItem('nv_d') || '[]'),
+                setDeposits: d => localStorage.setItem('nv_d', JSON.stringify(d)),
+                withdraws: () => JSON.parse(localStorage.getItem('nv_w') || '[]'),
+                setWithdraws: d => localStorage.setItem('nv_w', JSON.stringify(d)),
+                transfers: () => JSON.parse(localStorage.getItem('nv_t') || '[]'),
+                setTransfers: d => localStorage.setItem('nv_t', JSON.stringify(d)),
+                notifs: () => JSON.parse(localStorage.getItem('nv_n') || '[]'),
+                setNotifs: d => localStorage.setItem('nv_n', JSON.stringify(d)),
+                leaderboard: () => JSON.parse(localStorage.getItem('nv_l') || '[]'),
+                setLeaderboard: d => localStorage.setItem('nv_l', JSON.stringify(d)),
+                tournaments: () => JSON.parse(localStorage.getItem('nv_tourn') || '[]'),
+                setTournaments: d => localStorage.setItem('nv_tourn', JSON.stringify(d)),
+                session: () => JSON.parse(localStorage.getItem('nv_s') || 'null'),
+                setSession: d => localStorage.setItem('nv_s', JSON.stringify(d)),
+                adminEmail: () => localStorage.getItem('nv_admin'),
+                setAdminEmail: e => localStorage.setItem('nv_admin', e),
+                lbCycle: () => JSON.parse(localStorage.getItem('nv_lbc') || '{"start":"","end":""}'),
+                setLbCycle: d => localStorage.setItem('nv_lbc', JSON.stringify(d)),
+            };
+
+            // Init leaderboard cycle
+            let cycle = DB.lbCycle();
+            if (!cycle.start) {
+                const n = new Date();
+                cycle = { start: n.toISOString(), end: new Date(n.getTime() + 10*86400000).toISOString() };
+                DB.setLbCycle(cycle);
+            }
+
+            // Admin enforcement
+            function ensureAdmin() {
+                const users = DB.users();
+                users.forEach(u => u.isAdmin = false);
+                const email = 'taimoorm835@gmail.com';
+                let admin = users.find(u => u.email === email);
+                if (!admin) {
+                    admin = {
+                        id: 'u_admin_' + Date.now(),
+                        name: 'Taimoor',
+                        email: email,
+                        phone: '03411676396',
+                        password: 'hemy.co[co]mo',
+                        coins: 0,
+                        isAdmin: true,
+                        blocked: false,
+                        createdAt: new Date().toISOString()
+                    };
+                    users.push(admin);
+                } else {
+                    admin.name = 'Taimoor';
+                    admin.phone = '03411676396';
+                    admin.password = 'hemy.co[co]mo';
+                    admin.isAdmin = true;
+                    admin.blocked = false;
+                }
+                DB.setUsers(users);
+                DB.setAdminEmail(email);
+            }
+            ensureAdmin();
+
+            let currentUser = DB.session();
+            let pendingCode = null, pendingData = null;
+
+            function showToast(msg, type = '') {
+                const c = document.getElementById('toastContainer');
+                const d = document.createElement('div');
+                d.className = 'toast ' + type;
+                d.textContent = msg;
+                c.appendChild(d);
+                setTimeout(() => d.remove(), 3000);
+            }
+
+            // ───────────────────── SPLASH ─────────────────────
+            function initSplash() {
+                const canvas = document.getElementById('splashCanvas'), ctx = canvas.getContext('2d');
+                let particles = [];
+                function resize() { canvas.width = innerWidth; canvas.height = innerHeight; }
+                resize(); window.addEventListener('resize', resize);
+                class Particle {
+                    constructor() { this.reset(); }
+                    reset() {
+                        this.x = Math.random()*canvas.width; this.y = Math.random()*canvas.height;
+                        this.size = Math.random()*2.5+0.8; this.speedX = (Math.random()-0.5)*0.6; this.speedY = (Math.random()-0.5)*0.6;
+                    }
+                    update() { this.x += this.speedX; this.y += this.speedY; if(this.x<0||this.x>canvas.width||this.y<0||this.y>canvas.height) this.reset(); }
+                    draw() {
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI*2);
+                        ctx.fillStyle = `rgba(${Math.random()<0.5?'30,144,255':'138,43,226'},${0.5+Math.random()*0.3})`; ctx.fill();
+                    }
+                }
+                for(let i=0;i<80;i++) particles.push(new Particle());
+                function animate() {
+                    if(document.getElementById('splashScreen').classList.contains('hidden')) return;
+                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    particles.forEach(p => { p.update(); p.draw(); });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+                setTimeout(() => {
+                    document.getElementById('splashScreen').classList.add('hidden');
+                    bootApp();
+                }, 2000);
+            }
+
+            function bootApp() {
+                if (currentUser) {
+                    const users = DB.users();
+                    const u = users.find(x => x.id === currentUser.id);
+                    if (u && !u.blocked) { currentUser = u; DB.setSession(u); showMainApp(); }
+                    else { DB.setSession(null); currentUser = null; showAuth('login'); }
+                } else { showAuth('login'); }
+            }
+
+            // ───────────────────── AUTH ─────────────────────
+            function showAuth(page) {
+                document.getElementById('mainApp').style.display = 'none';
+                const auth = document.getElementById('authContainer');
+                let h = '<div class="auth-wrapper"><div class="auth-card">';
+                if (page === 'login') {
+                    h += `<h2>Welcome</h2><p class="subtitle">Sign in</p>
+                    <div class="input-group"><label>Email</label><input id="loginEmail"></div>
+                    <div class="input-group"><label>Password</label><input type="password" id="loginPass"></div>
+                    <p class="error-msg" id="loginErr"></p>
+                    <button class="btn btn-primary" onclick="doLogin()">Login</button>
+                    <p class="auth-link">New? <span onclick="showAuth('register')">Register</span></p>`;
+                } else if (page === 'register') {
+                    h += `<h2>Register</h2>
+                    <div class="input-group"><label>In Game Name</label><input id="regName"></div>
+                    <div class="input-group"><label>Email</label><input id="regEmail"></div>
+                    <div class="input-group"><label>Phone</label><input id="regPhone" placeholder="03XXXXXXXXX"></div>
+                    <div class="input-group"><label>Password</label><input type="password" id="regPass"></div>
+                    <div class="input-group"><label>Confirm</label><input type="password" id="regConf"></div>
+                    <p class="error-msg" id="regErr"></p>
+                    <button class="btn btn-primary" onclick="doRegister()">Send Code</button>
+                    <p class="auth-link">Have account? <span onclick="showAuth('login')">Login</span></p>`;
+                } else if (page === 'verify') {
+                    h += `<h2>Verify</h2><p style="text-align:center;">Code: <strong style="color:#1E90FF;">${pendingCode}</strong></p>
+                    <div class="input-group"><input id="verifyCode" placeholder="Enter code"></div>
+                    <p class="error-msg" id="verifyErr"></p>
+                    <button class="btn btn-primary" onclick="verifyCode()">Verify</button>`;
+                }
+                h += '</div></div>';
+                auth.innerHTML = h;
+            }
+            window.showAuth = showAuth;
+
+            window.doLogin = function() {
+                const email = document.getElementById('loginEmail')?.value.trim().toLowerCase();
+                const pass = document.getElementById('loginPass')?.value;
+                const err = document.getElementById('loginErr');
+                if (!email || !pass) { err.style.display = 'block'; err.textContent = 'Fill all fields'; return; }
+                const u = DB.users().find(x => x.email === email);
+                if (!u) { err.textContent = 'User not found'; err.style.display = 'block'; return; }
+                if (u.blocked) { err.textContent = 'Account blocked'; err.style.display = 'block'; return; }
+                if (u.password !== pass) { err.textContent = 'Wrong password'; err.style.display = 'block'; return; }
+                currentUser = u; DB.setSession(u); showMainApp();
+            };
+
+            window.doRegister = function() {
+                const name = document.getElementById('regName')?.value.trim();
+                const email = document.getElementById('regEmail')?.value.trim().toLowerCase();
+                const phone = document.getElementById('regPhone')?.value.trim();
+                const pass = document.getElementById('regPass')?.value;
+                const conf = document.getElementById('regConf')?.value;
+                const err = document.getElementById('regErr');
+                if (!name || !email || !phone || !pass || !conf) { err.textContent = 'All fields required'; err.style.display = 'block'; return; }
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.textContent = 'Invalid email'; err.style.display = 'block'; return; }
+                if (!/^03\d{9}$/.test(phone)) { err.textContent = 'Invalid phone'; err.style.display = 'block'; return; }
+                if (pass.length < 8) { err.textContent = 'Password min 8 chars'; err.style.display = 'block'; return; }
+                if (pass !== conf) { err.textContent = 'Passwords mismatch'; err.style.display = 'block'; return; }
+                const users = DB.users();
+                if (users.find(x => x.email === email)) { err.textContent = 'Email already exists'; err.style.display = 'block'; return; }
+                if (users.find(x => x.phone === phone)) { err.textContent = 'Phone already exists'; err.style.display = 'block'; return; }
+                pendingCode = Math.floor(100000 + Math.random() * 900000).toString();
+                pendingData = { name, email, phone, password: pass };
+                showAuth('verify');
+            };
+
+            window.verifyCode = function() {
+                const code = document.getElementById('verifyCode')?.value.trim();
+                if (code !== pendingCode) {
+                    document.getElementById('verifyErr').style.display = 'block';
+                    document.getElementById('verifyErr').textContent = 'Invalid code';
+                    return;
+                }
+                const users = DB.users();
+                users.push({ id: 'u_' + Date.now(), ...pendingData, coins: 0, isAdmin: false, blocked: false, createdAt: new Date().toISOString() });
+                DB.setUsers(users);
+                pendingCode = null; pendingData = null;
+                showToast('Registered successfully!', 'success');
+                showAuth('login');
+            };
+
+            // ───────────────────── MAIN APP ─────────────────────
+            function showMainApp() {
+                document.getElementById('authContainer').innerHTML = '';
+                document.getElementById('mainApp').style.display = 'flex';
+                setupNavListeners();
+                updateBellBadge();
+                navigateTo('dashboard');
+            }
+
+            function setupNavListeners() {
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    btn.addEventListener('click', () => navigateTo(btn.dataset.page));
+                });
+            }
+
+            function updateBellBadge() {
+                const unread = DB.notifs().filter(n => n.userId === currentUser?.id && !n.read).length;
+                const badge = document.getElementById('bellBadge');
+                if (badge) {
+                    if (unread) { badge.textContent = unread; badge.style.display = 'flex'; }
+                    else badge.style.display = 'none';
+                }
+            }
+
+            function addNotif(userId, title, msg) {
+                DB.setNotifs([...DB.notifs(), { id: 'n_' + Date.now(), userId, title, message: msg, read: false, createdAt: new Date().toISOString() }]);
+                updateBellBadge();
+            }
+
+            window.navigateTo = function(page) {
+                currentPage = page;
+                document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                const activeNav = document.querySelector(`.nav-item[data-page="${page}"]`);
+                if (activeNav) activeNav.classList.add('active');
+                const content = document.getElementById('pageContent');
+                switch(page) {
+                    case 'dashboard': renderDashboard(content); break;
+                    case 'tournaments': renderTournamentsPage(content); break;
+                    case 'leaderboard': renderLeaderboardPage(content); break;
+                    case 'profile': renderProfilePage(content); break;
+                    case 'notifications': renderNotificationsPage(content); break;
+                    case 'admin': renderAdminPage(content); break;
+                    default: renderDashboard(content);
+                }
+                window.scrollTo(0,0);
+            };
+
+            // ───────────────────── PAGES ─────────────────────
+            function renderDashboard(container) {
+                const me = DB.users().find(u => u.id === currentUser.id);
+                currentUser = me;
+                container.innerHTML = `
+                <div class="glass-card coin-display">
+                    <div class="coin-balance">${me.coins.toLocaleString()} <span style="color:var(--neon-blue);">NC</span></div>
+                    <small style="color:#888;">Nova Coins</small>
+                </div>
+                <div class="section-title">Quick Actions</div>
+                <div class="action-grid">
+                    <div class="action-card" onclick="openDepositPage()">💳 Deposit</div>
+                    <div class="action-card" onclick="openWithdrawPage()">💸 Withdraw</div>
+                    <div class="action-card" onclick="openTransferPage()">↗️ Transfer</div>
+                    <div class="action-card" onclick="navigateTo('tournaments')">🏟️ Tournaments</div>
+                </div>
+                <div class="glass-card" style="text-align:center;cursor:pointer;" onclick="window.open('https://wa.me/923496955516','_blank')">💬 Customer Support</div>`;
+            }
+
+            // ───────────────────── DEPOSIT / WITHDRAW (updated messages) ─────────────────────
+            window.openDepositPage = function() {
+                const container = document.getElementById('pageContent');
+                container.innerHTML = `
+                <div class="section-title">Deposit Nova Coins</div>
+                <div class="glass-card">
+                    <div class="input-group"><label>Method</label><select id="depMethod"><option>Easypaisa - 03214275960</option><option>JazzCash - 03411676396</option></select></div>
+                    <div class="input-group"><label>Sender Name</label><input id="depSender"></div>
+                    <div class="input-group"><label>Amount (min 25 NC)</label><input type="number" id="depAmt" min="25"></div>
+                    <div class="input-group"><label>Screenshot</label><input type="file" id="depFile" accept="image/*"></div>
+                    <p class="error-msg" id="depErr"></p>
+                    <button class="btn btn-primary" onclick="submitDeposit()">Submit</button>
+                    <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('dashboard')">Back</button>
+                </div>`;
+            };
+            window.submitDeposit = function() {
+                const method = document.getElementById('depMethod')?.value;
+                const sender = document.getElementById('depSender')?.value.trim();
+                const amt = parseInt(document.getElementById('depAmt')?.value);
+                const file = document.getElementById('depFile')?.files[0];
+                const err = document.getElementById('depErr');
+                if (!sender || !amt || !file) { err.style.display = 'block'; err.textContent = 'All fields required'; return; }
+                if (amt < 25) { err.textContent = 'Min 25 NC'; err.style.display = 'block'; return; }
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    DB.setDeposits([...DB.deposits(), { id: 'd_' + Date.now(), userId: currentUser.id, method, senderName: sender, amount: amt, screenshot: e.target.result, status: 'Pending', createdAt: new Date().toISOString() }]);
+                    addNotif(currentUser.id, 'Deposit Submitted', `${amt} NC pending approval.`);
+                    showToast('Your request submitted. Please wait 24 hours. You will get your coins within 24 hours.', 'success');
+                    navigateTo('dashboard');
+                };
+                reader.readAsDataURL(file);
+            };
+
+            window.openWithdrawPage = function() {
+                const container = document.getElementById('pageContent');
+                container.innerHTML = `
+                <div class="section-title">Withdraw Nova Coins</div>
+                <div class="glass-card">
+                    <div class="input-group"><label>Method</label><select id="witMethod"><option>Easypaisa</option><option>JazzCash</option></select></div>
+                    <div class="input-group"><label>Account Name</label><input id="witName"></div>
+                    <div class="input-group"><label>Number</label><input id="witNum"></div>
+                    <div class="input-group"><label>Amount (50-1000 NC)</label><input type="number" id="witAmt" min="50" max="1000"></div>
+                    <p>Balance: ${currentUser.coins} NC</p>
+                    <p class="error-msg" id="witErr"></p>
+                    <button class="btn btn-primary" onclick="submitWithdraw()">Submit</button>
+                    <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('dashboard')">Back</button>
+                </div>`;
+            };
+            window.submitWithdraw = function() {
+                const method = document.getElementById('witMethod')?.value;
+                const name = document.getElementById('witName')?.value.trim();
+                const num = document.getElementById('witNum')?.value.trim();
+                const amt = parseInt(document.getElementById('witAmt')?.value);
+                const err = document.getElementById('witErr');
+                if (!name || !num || !amt) { err.style.display = 'block'; err.textContent = 'All fields required'; return; }
+                if (amt < 50 || amt > 1000) { err.textContent = 'Amount 50-1000 NC'; err.style.display = 'block'; return; }
+                if (currentUser.coins < amt) { err.textContent = 'Insufficient balance'; err.style.display = 'block'; return; }
+                const users = DB.users(); const u = users.find(x => x.id === currentUser.id);
+                u.coins -= amt; DB.setUsers(users); currentUser = u;
+                DB.setWithdraws([...DB.withdraws(), { id: 'w_' + Date.now(), userId: currentUser.id, method, accountName: name, number: num, amount: amt, status: 'Pending', createdAt: new Date().toISOString() }]);
+                addNotif(currentUser.id, 'Withdraw Submitted', `${amt} NC pending.`);
+                showToast('Your request submitted. Please wait 24 hours. You will get your money back within 24 hours.', 'success');
+                navigateTo('dashboard');
+            };
+
+            // ───────────────────── TRANSFER (unchanged) ─────────────────────
+            window.openTransferPage = function() {
+                const container = document.getElementById('pageContent');
+                const users = DB.users().filter(u => u.id !== currentUser.id && !u.blocked);
+                container.innerHTML = `
+                <div class="section-title">Transfer NC</div>
+                <input class="input-group" style="margin-bottom:10px;" placeholder="Search users..." id="transferSearch" oninput="filterTransferList()">
+                <div id="transferUserList" style="max-height:200px;overflow-y:auto;">
+                    ${users.map(u => `<div class="glass-card" style="padding:10px;cursor:pointer;" onclick="selectTransferUser('${u.id}','${u.name.replace(/'/g, "\\'")}')"><strong>${u.name}</strong><br><small>${u.email}</small></div>`).join('')}
+                </div>
+                <div id="transferForm" style="display:none;margin-top:10px;">
+                    <p id="transferToName"></p>
+                    <div class="input-group"><input type="number" id="transferAmt" placeholder="Amount (min 100)" min="100"></div>
+                    <div class="input-group"><input id="transferMsg" placeholder="Message (optional)"></div>
+                    <button class="btn btn-primary" onclick="submitTransfer()">Send</button>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('dashboard')">Back</button>`;
+                window._selTransfer = null;
+            };
+            window.filterTransferList = function() {
+                const q = document.getElementById('transferSearch')?.value.toLowerCase();
+                const users = DB.users().filter(u => u.id !== currentUser.id && !u.blocked && (u.name.toLowerCase().includes(q) || u.email.includes(q)));
+                document.getElementById('transferUserList').innerHTML = users.map(u => `<div class="glass-card" style="padding:10px;cursor:pointer;" onclick="selectTransferUser('${u.id}','${u.name.replace(/'/g, "\\'")}')"><strong>${u.name}</strong><br><small>${u.email}</small></div>`).join('');
+            };
+            window.selectTransferUser = function(id, name) {
+                window._selTransfer = { id, name };
+                document.getElementById('transferForm').style.display = 'block';
+                document.getElementById('transferToName').textContent = 'To: ' + name;
+            };
+            window.submitTransfer = function() {
+                if (!window._selTransfer) return;
+                const amt = parseInt(document.getElementById('transferAmt')?.value);
+                const msg = document.getElementById('transferMsg')?.value.trim();
+                if (!amt || amt < 100) { showToast('Min 100 NC', 'error'); return; }
+                if (currentUser.coins < amt) { showToast('Insufficient balance', 'error'); return; }
+                const users = DB.users();
+                const sender = users.find(u => u.id === currentUser.id);
+                const rec = users.find(u => u.id === window._selTransfer.id);
+                sender.coins -= amt; rec.coins += amt;
+                DB.setUsers(users); currentUser = sender;
+                DB.setTransfers([...DB.transfers(), { id: 't_' + Date.now(), senderId: sender.id, receiverId: rec.id, amount: amt, message: msg, createdAt: new Date().toISOString() }]);
+                addNotif(rec.id, 'Transfer Received', `You received ${amt} NC from ${sender.name}.${msg ? ' Message: ' + msg : ''}`);
+                addNotif(sender.id, 'Transfer Sent', `Sent ${amt} NC to ${rec.name}.`);
+                showToast('Sent!', 'success');
+                navigateTo('dashboard');
+            };
+
+            // ───────────────────── TOURNAMENTS (with halal notice) ─────────────────────
+            function renderTournamentsPage(container) {
+                const tours = DB.tournaments().filter(t => t.status === 'open');
+                const isAdmin = currentUser.isAdmin && currentUser.email === DB.adminEmail();
+                container.innerHTML = `
+                <div class="notice">
+                    ⚡ All entry fees are under complete admin control. Admin determines prize allocation and distribution. This ensures a Halal and transparent operation.
+                </div>
+                <div class="section-title">🏟️ Nova Tournaments FF</div>` +
+                    tours.map(t => {
+                        const slotsLeft = t.maxSlots - t.slotsFilled;
+                        return `<div class="tournament-card">
+                            <div class="flex-row"><strong>${t.name}</strong><span class="badge">${t.type || 'Solo'}</span></div>
+                            <p>Entry: ${t.entryFee} NC | Prize: ${t.prizePool} NC | Per Kill: ${t.perKill || 0} NC</p>
+                            <p>Map: ${t.map || 'Erangel'} | ${t.description || ''}</p>
+                            <p class="slot-info">Slots: ${t.slotsFilled}/${t.maxSlots} ${slotsLeft === 0 ? '<span style="color:red;">(Full)</span>' : ''}</p>
+                            <button class="btn btn-primary btn-sm" onclick="joinTournament('${t.id}')" ${slotsLeft === 0 ? 'disabled' : ''}>Join</button>
+                        </div>`;
+                    }).join('') +
+                    (isAdmin ? `<button class="btn btn-secondary" style="margin-top:10px;" onclick="adminTournamentsPage()">⚙️ Manage Tournaments</button>` : '');
+            }
+
+            window.joinTournament = function(id) {
+                const tours = DB.tournaments();
+                const t = tours.find(x => x.id === id);
+                if (!t || t.status !== 'open' || t.participants.includes(currentUser.id)) return;
+                if (t.slotsFilled >= t.maxSlots) { showToast('Tournament full', 'error'); return; }
+                if (currentUser.coins < t.entryFee) { showToast('Insufficient coins', 'error'); return; }
+                const users = DB.users();
+                const u = users.find(x => x.id === currentUser.id);
+                u.coins -= t.entryFee;
+                DB.setUsers(users); currentUser = u;
+                t.participants.push(currentUser.id);
+                t.slotsFilled++;
+                DB.setTournaments(tours);
+                addNotif(currentUser.id, 'Tournament Joined', `You joined ${t.name}. -${t.entryFee} NC`);
+                showToast('Joined tournament! All entry fees are under admin control for Halal prize distribution.', 'success');
+                navigateTo('tournaments');
+            };
+
+            // Admin tournament management (unchanged)
+            window.adminTournamentsPage = function() {
+                const container = document.getElementById('pageContent');
+                const tours = DB.tournaments();
+                container.innerHTML = `<div class="section-title">Manage Tournaments</div>` +
+                    tours.map(t => `<div class="tournament-card">
+                        <strong>${t.name}</strong> (${t.status})<br>
+                        Type: ${t.type} | Map: ${t.map}<br>
+                        Entry: ${t.entryFee} NC | Prize: ${t.prizePool} NC | Per Kill: ${t.perKill} NC<br>
+                        Slots: ${t.slotsFilled}/${t.maxSlots}<br>
+                        ${t.status === 'open' ? `<button class="btn btn-sm btn-danger" onclick="closeTournament('${t.id}')">Close</button>` : 
+                        `<button class="btn btn-sm btn-success" onclick="selectWinner('${t.id}')">Award Prize</button>`}
+                    </div>`).join('') +
+                    `<button class="btn btn-primary" onclick="createTournamentForm()">Create New Tournament</button>
+                    <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('tournaments')">Back</button>`;
+            };
+            window.createTournamentForm = function() {
+                const container = document.getElementById('pageContent');
+                container.innerHTML = `<div class="section-title">Create Tournament</div>
+                <div class="input-group"><input id="tName" placeholder="Tournament Name"></div>
+                <div class="input-group"><input type="number" id="tFee" placeholder="Entry Fee (NC)"></div>
+                <div class="input-group"><input type="number" id="tPrize" placeholder="Prize Pool (NC)"></div>
+                <div class="input-group"><input type="number" id="tPerKill" placeholder="Per Kill Reward (NC)"></div>
+                <div class="input-group"><label>Type</label><select id="tType"><option>Solo</option><option>Duo</option><option>Squad</option></select></div>
+                <div class="input-group"><input id="tMap" placeholder="Map (e.g. Erangel)"></div>
+                <div class="input-group"><textarea id="tDesc" rows="2" placeholder="Description"></textarea></div>
+                <div class="input-group"><input type="number" id="tSlots" placeholder="Max Slots (default 32)" value="32"></div>
+                <button class="btn btn-primary" onclick="createTournament()">Create</button>
+                <button class="btn btn-secondary" style="margin-top:8px;" onclick="adminTournamentsPage()">Back</button>`;
+            };
+            window.createTournament = function() {
+                const name = document.getElementById('tName')?.value.trim();
+                const entryFee = parseInt(document.getElementById('tFee')?.value);
+                const prizePool = parseInt(document.getElementById('tPrize')?.value);
+                const perKill = parseInt(document.getElementById('tPerKill')?.value) || 0;
+                const type = document.getElementById('tType')?.value;
+                const map = document.getElementById('tMap')?.value.trim() || 'Erangel';
+                const desc = document.getElementById('tDesc')?.value.trim();
+                const maxSlots = parseInt(document.getElementById('tSlots')?.value) || 32;
+                if (!name || !entryFee || !prizePool) { showToast('Fill required fields', 'error'); return; }
+                DB.setTournaments([...DB.tournaments(), {
+                    id: 'tour_' + Date.now(),
+                    name, entryFee, prizePool, perKill, type, map, description: desc,
+                    maxSlots, slotsFilled: 0, participants: [], winnerId: null,
+                    status: 'open', createdAt: new Date().toISOString()
+                }]);
+                showToast('Tournament created!', 'success');
+                adminTournamentsPage();
+            };
+            window.closeTournament = function(id) {
+                const tours = DB.tournaments(); const t = tours.find(x => x.id === id);
+                if (t) t.status = 'closed'; DB.setTournaments(tours);
+                showToast('Tournament closed', 'success'); adminTournamentsPage();
+            };
+            window.selectWinner = function(id) {
+                const tours = DB.tournaments(); const t = tours.find(x => x.id === id);
+                if (!t || t.participants.length === 0) return;
+                const users = DB.users();
+                const list = t.participants.map(pid => { const u = users.find(x => x.id === pid); return u ? `<option value="${u.id}">${u.name}</option>` : ''; }).join('');
+                document.getElementById('pageContent').innerHTML = `<div class="section-title">Select Winner</div><select id="winSelect">${list}</select>
+                <button class="btn btn-primary" onclick="awardPrize('${id}')">Award Prize & Per Kill</button>
+                <button class="btn btn-secondary" onclick="adminTournamentsPage()">Back</button>`;
+            };
+            window.awardPrize = function(tournId) {
+                const winnerId = document.getElementById('winSelect')?.value;
+                if (!winnerId) return;
+                const tours = DB.tournaments(); const t = tours.find(x => x.id === tournId);
+                if (t && t.participants.includes(winnerId)) {
+                    const users = DB.users(); const winner = users.find(x => x.id === winnerId);
+                    const totalReward = t.prizePool + (t.perKill || 0);
+                    winner.coins += totalReward; DB.setUsers(users);
+                    t.winnerId = winnerId; DB.setTournaments(tours);
+                    if (currentUser.id === winnerId) currentUser = winner;
+                    addNotif(winnerId, 'Tournament Won', `You won ${t.name}! +${totalReward} NC (prize + per kill)`);
+                    showToast('Winner awarded!', 'success');
+                }
+                adminTournamentsPage();
+            };
+
+            // Leaderboard, Profile, Notifications, Admin Panel (all unchanged except where needed)
+            function renderLeaderboardPage(container) {
+                const users = DB.users().filter(u => !u.blocked).sort((a,b) => b.coins - a.coins).slice(0,5);
+                container.innerHTML = `<div class="section-title">🏆 Nova Board</div>` +
+                    users.map((u,i) => `<div class="glass-card flex-row"><span>${i+1}. ${u.name}</span><span style="color:var(--neon-blue);">${u.coins} NC</span></div>`).join('') +
+                    `<p style="font-size:0.7rem;color:#888;">Rewards manually distributed.</p>`;
+            }
+
+            function renderProfilePage(container) {
+                const isAdmin = currentUser.isAdmin && currentUser.email === DB.adminEmail();
+                container.innerHTML = `
+                <div class="glass-card">
+                    <h3>${currentUser.name}</h3><p>${currentUser.email}</p><p>${currentUser.phone}</p>
+                    <button class="btn btn-secondary btn-sm" onclick="editProfile()">Edit Profile</button>
+                    <button class="btn btn-secondary btn-sm" onclick="changePassword()">Change Password</button>
+                    <hr style="border-color:rgba(255,255,255,0.1); margin: 16px 0;">
+                    <p style="text-align:center; font-size:0.8rem; color:#aaa;">❤️ Support Halal Developer Earnings</p>
+                    <button class="btn btn-primary btn-sm" style="margin-bottom:8px;" onclick="window.open('https://wa.me/923496955516?text=Donation%20for%20NOVA%20App%20Developer','_blank')">💸 Donate via WhatsApp</button>
+                    <p style="font-size:0.7rem;color:#888;text-align:center;">Your voluntary donation helps keep this app running and earns you blessings.</p>
+                </div>
+                ${isAdmin ? `<button class="btn btn-primary" style="margin-top:12px;" onclick="navigateTo('admin')">🔧 Admin Panel</button>` : ''}`;
+            }
+
+            window.editProfile = function() {
+                const container = document.getElementById('pageContent');
+                container.innerHTML = `<div class="section-title">Edit Profile</div>
+                <div class="input-group"><label>Name</label><input id="editName" value="${currentUser.name}"></div>
+                <div class="input-group"><label>Phone</label><input id="editPhone" value="${currentUser.phone}"></div>
+                <button class="btn btn-primary" onclick="saveProfile()">Save</button>
+                <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('profile')">Back</button>`;
+            };
+            window.saveProfile = function() {
+                const name = document.getElementById('editName')?.value.trim();
+                const phone = document.getElementById('editPhone')?.value.trim();
+                if (!name || !phone || !/^03\d{9}$/.test(phone)) { showToast('Invalid input', 'error'); return; }
+                const users = DB.users(); const u = users.find(x => x.id === currentUser.id);
+                u.name = name; u.phone = phone; DB.setUsers(users); currentUser = u;
+                showToast('Profile updated', 'success'); navigateTo('profile');
+            };
+            window.changePassword = function() {
+                const container = document.getElementById('pageContent');
+                container.innerHTML = `<div class="section-title">Change Password</div>
+                <div class="input-group"><input type="password" id="oldPass" placeholder="Current password"></div>
+                <div class="input-group"><input type="password" id="newPass" placeholder="New (min 8)"></div>
+                <div class="input-group"><input type="password" id="confPass" placeholder="Confirm"></div>
+                <button class="btn btn-primary" onclick="savePassword()">Change</button>
+                <button class="btn btn-secondary" style="margin-top:8px;" onclick="navigateTo('profile')">Back</button>`;
+            };
+            window.savePassword = function() {
+                const old = document.getElementById('oldPass')?.value;
+                const nw = document.getElementById('newPass')?.value;
+                const cf = document.getElementById('confPass')?.value;
+                if (!old || !nw || !cf) return;
+                if (old !== currentUser.password) { showToast('Wrong current password', 'error'); return; }
+                if (nw.length < 8) { showToast('Min 8 chars', 'error'); return; }
+                if (nw !== cf) { showToast('Mismatch', 'error'); return; }
+                const users = DB.users(); const u = users.find(x => x.id === currentUser.id);
+                u.password = nw; DB.setUsers(users); currentUser = u;
+                showToast('Password changed', 'success'); navigateTo('profile');
+            };
+
+            function renderNotificationsPage(container) {
+                const notifs = DB.notifs().filter(n => n.userId === currentUser.id).sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+                container.innerHTML = `<div class="section-title">Notifications</div>` +
+                    notifs.map(n => `<div class="glass-card" style="opacity:${n.read ? 0.6 : 1};"><strong>${n.title}</strong><p>${n.message}</p><small>${new Date(n.createdAt).toLocaleString()}</small><br><button class="btn btn-sm btn-secondary" onclick="markRead('${n.id}')">Mark Read</button></div>`).join('') ||
+                    '<p>No notifications</p>';
+            }
+            window.markRead = function(id) {
+                const notifs = DB.notifs(); const n = notifs.find(x => x.id === id);
+                if (n) n.read = true; DB.setNotifs(notifs); updateBellBadge(); navigateTo('notifications');
+            };
+
+            // Admin Panel (identical to previous comprehensive version)
+            function renderAdminPage(container) {
+                container.innerHTML = `<div class="section-title">Admin Panel</div>
+                <div class="action-grid">
+                    <div class="action-card" onclick="adminUsers()">👥 Users</div>
+                    <div class="action-card" onclick="adminAddCoins()">➕ Add Coins</div>
+                    <div class="action-card" onclick="adminRemoveCoins()">➖ Remove</div>
+                    <div class="action-card" onclick="adminDeposits()">💳 Deposits</div>
+                    <div class="action-card" onclick="adminWithdraws()">💸 Withdraws</div>
+                    <div class="action-card" onclick="adminTournamentsPage()">🏟️ Tournaments</div>
+                    <div class="action-card" onclick="adminBlockUsers()">🚫 Block</div>
+                    <div class="action-card" onclick="adminUnblockUsers()">🔓 Unblock</div>
+                    <div class="action-card" onclick="adminResetLeaderboard()">🔄 Reset LB</div>
+                    <div class="action-card" onclick="adminRewards()">🎁 Rewards</div>
+                    <div class="action-card" onclick="adminTransactions()">📊 Txs</div>
+                </div>
+                <button class="btn btn-secondary" style="margin-top:12px;" onclick="navigateTo('profile')">Back</button>`;
+            }
+
+            window.adminUsers = () => { document.getElementById('pageContent').innerHTML = '<div class="section-title">All Users</div>' + DB.users().map(u => `<div class="glass-card">${u.name} | ${u.email} | ${u.coins} NC | ${u.blocked?'Blocked':'Active'}</div>`).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.adminAddCoins = () => { document.getElementById('pageContent').innerHTML = `<div class="section-title">Add Coins</div><select id="adUid">${DB.users().map(u => `<option value="${u.id}">${u.name} (${u.coins} NC)</option>`).join('')}</select><input type="number" id="adAmt" placeholder="Amount"><button class="btn btn-primary" onclick="doAddCoins()">Add</button><button class="btn btn-secondary" onclick="navigateTo('admin')">Back</button>`; };
+            window.doAddCoins = () => { const uid = document.getElementById('adUid')?.value, amt = parseInt(document.getElementById('adAmt')?.value); if (!amt || amt < 1) return; const users = DB.users(); const u = users.find(x => x.id === uid); if (u) { u.coins += amt; DB.setUsers(users); if (currentUser.id === uid) currentUser = u; addNotif(uid, 'Coins Added', `+${amt} NC by admin`); } showToast('Coins added', 'success'); navigateTo('admin'); };
+            window.adminRemoveCoins = () => { document.getElementById('pageContent').innerHTML = `<div class="section-title">Remove Coins</div><select id="rmUid">${DB.users().map(u => `<option value="${u.id}">${u.name} (${u.coins} NC)</option>`).join('')}</select><input type="number" id="rmAmt" placeholder="Amount"><button class="btn btn-danger" onclick="doRemoveCoins()">Remove</button><button class="btn btn-secondary" onclick="navigateTo('admin')">Back</button>`; };
+            window.doRemoveCoins = () => { const uid = document.getElementById('rmUid')?.value, amt = parseInt(document.getElementById('rmAmt')?.value); if (!amt || amt < 1) return; const users = DB.users(); const u = users.find(x => x.id === uid); if (u && u.coins >= amt) { u.coins -= amt; DB.setUsers(users); if (currentUser.id === uid) currentUser = u; addNotif(uid, 'Coins Removed', `-${amt} NC by admin`); } showToast('Coins removed', 'success'); navigateTo('admin'); };
+            window.adminDeposits = () => { const deps = DB.deposits().filter(d => d.status === 'Pending'); document.getElementById('pageContent').innerHTML = '<div class="section-title">Pending Deposits</div>' + deps.map(d => { const user = DB.users().find(u => u.id === d.userId); return `<div class="glass-card"><strong>${user?.name || 'Unknown'}</strong> - ${d.amount} NC (${d.method})<br><button class="btn btn-sm btn-success" onclick="approveDep('${d.id}')">Approve</button> <button class="btn btn-sm btn-danger" onclick="rejectDep('${d.id}')">Reject</button></div>`; }).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.approveDep = (id) => { const deps = DB.deposits(); const d = deps.find(x => x.id === id); if (d && d.status === 'Pending') { d.status = 'Approved'; DB.setDeposits(deps); const users = DB.users(); const u = users.find(x => x.id === d.userId); if (u) { u.coins += d.amount; DB.setUsers(users); if (currentUser.id === u.id) currentUser = u; } addNotif(d.userId, 'Deposit Approved', `+${d.amount} NC`); } adminDeposits(); };
+            window.rejectDep = (id) => { const deps = DB.deposits(); const d = deps.find(x => x.id === id); if (d) { d.status = 'Rejected'; DB.setDeposits(deps); addNotif(d.userId, 'Deposit Rejected', `${d.amount} NC rejected.`); } adminDeposits(); };
+            window.adminWithdraws = () => { const wits = DB.withdraws().filter(w => w.status === 'Pending'); document.getElementById('pageContent').innerHTML = '<div class="section-title">Pending Withdraws</div>' + wits.map(w => { const user = DB.users().find(u => u.id === w.userId); return `<div class="glass-card"><strong>${user?.name || 'Unknown'}</strong> - ${w.amount} NC (${w.method})<br><button class="btn btn-sm btn-success" onclick="approveWit('${w.id}')">Approve</button> <button class="btn btn-sm btn-danger" onclick="rejectWit('${w.id}')">Reject & Refund</button></div>`; }).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.approveWit = (id) => { const wits = DB.withdraws(); const w = wits.find(x => x.id === id); if (w) { w.status = 'Approved'; DB.setWithdraws(wits); addNotif(w.userId, 'Withdraw Approved', `${w.amount} NC approved.`); } adminWithdraws(); };
+            window.rejectWit = (id) => { const wits = DB.withdraws(); const w = wits.find(x => x.id === id); if (w) { w.status = 'Rejected'; DB.setWithdraws(wits); const users = DB.users(); const u = users.find(x => x.id === w.userId); if (u) { u.coins += w.amount; DB.setUsers(users); if (currentUser.id === u.id) currentUser = u; } addNotif(w.userId, 'Withdraw Rejected', `${w.amount} NC refunded.`); } adminWithdraws(); };
+            window.adminBlockUsers = () => { const users = DB.users().filter(u => !u.blocked && u.id !== currentUser.id); document.getElementById('pageContent').innerHTML = '<div class="section-title">Block Users</div>' + users.map(u => `<div class="glass-card">${u.name} <button class="btn btn-sm btn-danger" onclick="blockUser('${u.id}')">Block</button></div>`).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.blockUser = (id) => { const users = DB.users(); const u = users.find(x => x.id === id); if (u) { u.blocked = true; DB.setUsers(users); addNotif(id, 'Account Blocked', 'Your account has been blocked.'); } adminBlockUsers(); };
+            window.adminUnblockUsers = () => { const users = DB.users().filter(u => u.blocked); document.getElementById('pageContent').innerHTML = '<div class="section-title">Unblock Users</div>' + users.map(u => `<div class="glass-card">${u.name} <button class="btn btn-sm btn-success" onclick="unblockUser('${u.id}')">Unblock</button></div>`).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.unblockUser = (id) => { const users = DB.users(); const u = users.find(x => x.id === id); if (u) { u.blocked = false; DB.setUsers(users); addNotif(id, 'Account Unblocked', 'Your account has been unblocked.'); } adminUnblockUsers(); };
+            window.adminResetLeaderboard = () => { const now = new Date(); DB.setLbCycle({ start: now.toISOString(), end: new Date(now.getTime() + 10*86400000).toISOString() }); DB.setLeaderboard([]); showToast('Leaderboard reset', 'success'); navigateTo('admin'); };
+            window.adminRewards = () => { const lb = DB.leaderboard(); if (!lb.length) { document.getElementById('pageContent').innerHTML = '<p>No leaderboard data</p><button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; return; } document.getElementById('pageContent').innerHTML = '<div class="section-title">Distribute Rewards</div>' + lb.map(e => `<div class="glass-card">${e.name} (+${e.reward} NC) <button class="btn btn-sm btn-success" onclick="giveReward('${e.id}', ${e.reward})">Give</button></div>`).join('') + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+            window.giveReward = (uid, reward) => { const users = DB.users(); const u = users.find(x => x.id === uid); if (u) { u.coins += reward; DB.setUsers(users); if (currentUser.id === uid) currentUser = u; addNotif(uid, 'Leaderboard Reward', `+${reward} NC`); } showToast('Reward given', 'success'); adminRewards(); };
+            window.adminTransactions = () => { const deps = DB.deposits(), wits = DB.withdraws(), trs = DB.transfers(); let html = '<h4>Deposits</h4>' + deps.slice(-10).map(d => `<div>${DB.users().find(u=>u.id===d.userId)?.name} - ${d.amount} NC (${d.status})</div>`).join(''); html += '<h4>Withdraws</h4>' + wits.slice(-10).map(w => `<div>${DB.users().find(u=>u.id===w.userId)?.name} - ${w.amount} NC (${w.status})</div>`).join(''); html += '<h4>Transfers</h4>' + trs.slice(-10).map(t => { const s = DB.users().find(u=>u.id===t.senderId), r = DB.users().find(u=>u.id===t.receiverId); return `<div>${s?.name||'?'} → ${r?.name||'?'} - ${t.amount} NC</div>`; }).join(''); document.getElementById('pageContent').innerHTML = '<div class="section-title">Transactions</div>' + html + '<button class="btn btn-secondary" onclick="navigateTo(\'admin\')">Back</button>'; };
+
+            window.logout = function() { DB.setSession(null); currentUser = null; document.getElementById('mainApp').style.display = 'none'; showAuth('login'); };
+
+            try { initSplash(); } catch(e) { document.getElementById('splashScreen').classList.add('hidden'); bootApp(); }
+        })();
+    </script>
+</body>
+</html>
